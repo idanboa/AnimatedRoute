@@ -10,7 +10,7 @@ import UIKit
 import MapKit
 
 class ViewController: UIViewController {
-
+    
     lazy var mapView: MKMapView = {
         let map = MKMapView(frame: .zero)
         map.translatesAutoresizingMaskIntoConstraints = false
@@ -53,21 +53,21 @@ private extension ViewController {
         var previousSegment: MKPolyline?
         
         drawingTimer = Timer.scheduledTimer(withTimeInterval: stepDrawDuration, repeats: true) { [weak self] timer in
-            if let previous = previousSegment {
-                // Remove last drawn segment if needed.
-                self?.mapView.removeOverlay(previous)
-                previousSegment = nil
-            }
-            
             guard let self = self else {
-                // Finalize animation.
+                // Invalidate animation if we can't retain self
                 timer.invalidate()
                 completion?()
                 return
             }
             
+            if let previous = previousSegment {
+                // Remove last drawn segment if needed.
+                self.mapView.removeOverlay(previous)
+                previousSegment = nil
+            }
+            
             guard currentStep < totalSteps else {
-                // Final animation step.
+                // If this is the last animation step...
                 let finalPolyline = MKPolyline(coordinates: route, count: route.count)
                 self.mapView.addOverlay(finalPolyline)
                 // Assign the final polyline instance to the class property.
